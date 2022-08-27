@@ -9,11 +9,13 @@ from PIL import ImageTk, Image
 import requests
 import time
 from datetime import date, datetime
+from creds import Spotify_Credentials
 
 #Create Spotify API
+credentials = Spotify_Credentials()
 scope = "user-read-playback-state,user-modify-playback-state"
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="88fe685c5ea94e7abf1b015eacd5eace",
-                                               client_secret="204df711f1234999b3983024066ccf21",
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=credentials.Client_ID,
+                                               client_secret=credentials.Client_Secret,
                                                redirect_uri="http://localhost",
                                                scope="user-read-currently-playing")
                     )
@@ -81,45 +83,6 @@ def callSpot(last_trackID, last_albumID):
           }
     return spod
 
-#Init Tkinter
-root = Tk()
-root.title('Raspberry Spotipy Viewer')
-root.configure(bg='black')
-root.attributes('-fullscreen', True)
-
-#Init current SongID
-last_albumID = ""
-last_trackID = ""
-
-#Get this song as dictionary
-try:
-  song = callSpot(last_trackID, last_albumID)
-
-  last_trackID = song['TrackID']
-  last_albumID = song['AlbumID']
-except requests.exceptions.ReadTimeout:
-  print("Request timed out")
-
-#Set Text
-kTitle = Label(root, text = song['Name'], font=('Monospace Regular', 20, 'bold'), bg='black', fg='white')
-kArtist = Label(root, text = song['Artist'], font=('Monospace Regular', 18), bg='black', fg='white')
-
-#Select art style
-if song['Art'] != False:
-	kArtwork = Image.open('art.jpg')
-else:
-	kArtwork = Image.open('spotico.png')
-
-#Format Artwork and put it on screen
-kArtwork_resized = kArtwork.resize((490, 490), Image.ANTIALIAS)
-kArtwork_thumbnail = ImageTk.PhotoImage(kArtwork_resized)
-kPortrait = Label(image = kArtwork_thumbnail)
-
-#Pack Elements
-kTitle.pack()
-kArtist.pack()
-kPortrait.pack()
-
 def kUpdate(last_trackID, last_albumID):
   global kArtwork
   global kArtwork_resized
@@ -140,9 +103,9 @@ def kUpdate(last_trackID, last_albumID):
     
     #Select art style
     if song['Art'] != False:
-    	kArtwork = Image.open('art.jpg')
+      kArtwork = Image.open('art.jpg')
     else:
-    	kArtwork = Image.open('spotico.png')
+      kArtwork = Image.open('spotico.png')
 
     #Format Artwork and put it on screen
     kArtwork_resized = kArtwork.resize((490, 490), Image.ANTIALIAS)
@@ -161,9 +124,49 @@ def kUpdate(last_trackID, last_albumID):
 def close(event):
     exit()
 
-#Give user a way to exit
-root.bind('<Escape>', close)
-#Reschedule event in 2 seconds
-root.after(2000, lambda: kUpdate(last_trackID, last_albumID))
-#DO IT!
-root.mainloop()
+if __name__ == "__main__":
+  #Init Tkinter
+  root = Tk()
+  root.title('Raspberry Spotipy Viewer')
+  root.configure(bg='black')
+  root.attributes('-fullscreen', True)
+
+  #Init current SongID
+  last_albumID = ""
+  last_trackID = ""
+
+  #Get this song as dictionary
+  try:
+    song = callSpot(last_trackID, last_albumID)
+
+    last_trackID = song['TrackID']
+    last_albumID = song['AlbumID']
+  except requests.exceptions.ReadTimeout:
+    print("Request timed out")
+
+  #Set Text
+  kTitle = Label(root, text = song['Name'], font=('Monospace Regular', 20, 'bold'), bg='black', fg='white')
+  kArtist = Label(root, text = song['Artist'], font=('Monospace Regular', 18), bg='black', fg='white')
+
+  #Select art style
+  if song['Art'] != False:
+  	kArtwork = Image.open('art.jpg')
+  else:
+  	kArtwork = Image.open('spotico.png')
+
+  #Format Artwork and put it on screen
+  kArtwork_resized = kArtwork.resize((490, 490), Image.ANTIALIAS)
+  kArtwork_thumbnail = ImageTk.PhotoImage(kArtwork_resized)
+  kPortrait = Label(image = kArtwork_thumbnail)
+
+  #Pack Elements
+  kTitle.pack()
+  kArtist.pack()
+  kPortrait.pack()
+
+  #Give user a way to exit
+  root.bind('<Escape>', close)
+  #Reschedule event in 2 seconds
+  root.after(2000, lambda: kUpdate(last_trackID, last_albumID))
+  #DO IT!
+  root.mainloop()
