@@ -25,9 +25,9 @@ python3 Raspoti.py
 ```
 
 
-### Running on a Raspberry PI on startup.
+### Running on a Raspberry PI at startup.
 
-I found I needed the [Desktop Version of Raspberry PI OS](https://www.raspberrypi.com/documentation/computers/os.html)
+I found I needed the [Desktop Version of Raspberry PI OS](https://www.raspberrypi.com/documentation/computers/os.html).
 I had the most success placing the following code in my .bashrc file at the bottom.
 
 ```bash
